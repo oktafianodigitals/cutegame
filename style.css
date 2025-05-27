@@ -1,0 +1,314 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="%23ff69b4" opacity="0"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="white">🌸</text></svg>'), auto;
+}
+
+.sparkles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.sparkle {
+    position: absolute;
+    color: #fff;
+    font-size: 20px;
+    animation: sparkleFloat 3s infinite ease-in-out;
+}
+
+@keyframes sparkleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+        opacity: 0.7;
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+        opacity: 1;
+    }
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    z-index: 10;
+    position: relative;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 25px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 3px solid #ff69b4;
+    animation: bounceIn 1s ease-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.login-title {
+    font-size: 28px;
+    color: #ff1493;
+    margin-bottom: 20px;
+    font-weight: 800;
+}
+
+.pin-input {
+    font-size: 24px;
+    padding: 15px;
+    border: 3px solid #ff69b4;
+    border-radius: 15px;
+    text-align: center;
+    width: 200px;
+    margin: 20px 0;
+    background: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+}
+
+.login-btn {
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.2s;
+    font-family: 'Nunito', sans-serif;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="%23ff69b4" opacity="0"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="white">✨</text></svg>'), auto;
+}
+
+.login-btn:hover {
+    transform: scale(1.05);
+}
+
+.game-container {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    z-index: 10;
+    position: relative;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.main-title {
+    font-size: 36px;
+    color: #ff1493;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.game-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border: 3px solid #ff69b4;
+    transition: transform 0.3s;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+}
+
+.game-title {
+    font-size: 24px;
+    color: #ff1493;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.game-area {
+    min-height: 200px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.animal-emoji {
+    font-size: 60px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin: 10px;
+}
+
+.animal-emoji:hover {
+    transform: scale(1.2);
+}
+
+.game-btn {
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: transform 0.2s;
+    margin: 5px;
+    font-family: 'Nunito', sans-serif;
+}
+
+.game-btn:hover {
+    transform: scale(1.05);
+}
+
+.score {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff1493;
+    margin: 10px 0;
+}
+
+.memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 300px;
+    margin: 20px auto;
+}
+
+.memory-card {
+    width: 60px;
+    height: 60px;
+    background: #ff69b4;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    transition: transform 0.3s;
+}
+
+.memory-card:hover {
+    transform: scale(1.1);
+}
+
+.memory-card.flipped {
+    background: #fff;
+    border: 2px solid #ff69b4;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    z-index: 1000;
+    font-weight: 600;
+    transform: translateX(400px);
+    transition: transform 0.3s;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.emoji-rain {
+    position: fixed;
+    top: -50px;
+    font-size: 30px;
+    animation: emojiRain 3s linear infinite;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes emojiRain {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+.cute-border {
+    border: 3px dashed #ff69b4;
+    animation: borderPulse 2s infinite;
+}
+
+@keyframes borderPulse {
+
+    0%,
+    100% {
+        border-color: #ff69b4;
+    }
+
+    50% {
+        border-color: #ff1493;
+    }
+}
+
+@media (max-width: 768px) {
+    .games-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .main-title {
+        font-size: 28px;
+    }
+
+    .login-box {
+        margin: 20px;
+        padding: 30px;
+    }
+}
