@@ -70,9 +70,6 @@ function initializeLocationAccess() {
             
             let errorMessage = '';
             switch (error.code) {
-                // case error.PERMISSION_DENIED:
-                //     errorMessage = 'Akses lokasi ditolak. Website akan restart untuk meminta akses kembali.';
-                //     break;
                 case error.POSITION_UNAVAILABLE:
                     errorMessage = 'Informasi lokasi tidak tersedia. Website akan restart.';
                     break;
